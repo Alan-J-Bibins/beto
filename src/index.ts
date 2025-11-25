@@ -41,7 +41,7 @@ const defaultTypes: { [key: string]: RegExp[] } = {
     ],
 }
 
-export function initialize(config: BetoConfig) {
+function initialize(config: BetoConfig) {
     const types = config.types ?? defaultTypes;
     const compiledRules: BetoRule = {};
 
@@ -73,8 +73,8 @@ export function initialize(config: BetoConfig) {
     return { types, rules: compiledRules }
 }
 
-export function parse(input: string, config: BetoConfig) {
-    console.log("[src/index.ts:50] input = ", input)
+export function betoParse(input: string, config: BetoConfig) {
+    // console.log("[src/index.ts:50] input = ", input)
     const { rules } = initialize(config);
 
     const matches: { [trigger: string]: string[][] } = {};
