@@ -1,7 +1,7 @@
 import { defineConfig } from 'tsup';
 
 export default defineConfig({
-    entry: ['src/index.ts'],     // Entry file for your package
+    entry: ['src/**'],     // Entry file for your package
     format: ['cjs', 'esm'],      // Output both CommonJS and ESModules formats
     dts: true,                  // Generate TypeScript declaration files (*.d.ts)
     sourcemap: true,            // Include source maps for easier debugging
