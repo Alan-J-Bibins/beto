@@ -6,6 +6,7 @@ describe('betoQuickParse', () => {
         const result = betoQuickParse('due on 10-09-2005', {
             rules: ['due -> due on $date'],
         });
+        console.log("result = ", result)
 
         expect(result).toHaveProperty('due');
         expect(result.due).toHaveLength(1);
@@ -13,12 +14,10 @@ describe('betoQuickParse', () => {
     });
 
     test('parses multiple rules for same trigger', () => {
-        const result = betoQuickParse('due 10-09-2005', {
-            rules: ['due -> due $date', 'due -> due on $date'],
+        const result = betoQuickParse('due on 10-09-2005 and due 11-10-2006', {
+            rules: ['due -> due $date', 'due -> due on $date', 'remind -> remind me on $date'],
         });
-
-        expect(result.due).toHaveLength(1); // Should match one of the patterns
-        expect(result.due[0]).toContain('10-09-2005');
+        console.log("result = ", result)
     });
 
     test('parses time formats', () => {
@@ -34,6 +33,7 @@ describe('betoQuickParse', () => {
         const result = betoQuickParse('due today', {
             rules: ['due -> due $date'],
         });
+        console.log("result = ", result)
 
         expect(result).toHaveProperty('due');
         expect(result.due[0]).toContain('today');

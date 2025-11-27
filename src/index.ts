@@ -42,7 +42,20 @@ const defaultTypes: { [key: string]: RegExp[] } = {
 };
 
 function initialize(config: BetoConfig) {
-    const types = config.types ?? defaultTypes;
+    const types = { ...defaultTypes };
+
+    if (config.types) {
+        for (const key in config.types) {
+            if (Array.isArray(config.types[key])) {
+                if (config.types[key]!.length === 0) {
+                    types[key] = [];
+                } else {
+                    types[key] = [...(defaultTypes[key] ?? []), ...config.types[key]!];
+                }
+            }
+        }
+    }
+
     const compiledRules: BetoRule = {};
 
     for (let index = 0; index < config.rules.length; index++) {
@@ -83,21 +96,35 @@ function initialize(config: BetoConfig) {
 export function betoParse(input: string, betoRules?: BetoRule) {
     const rules: BetoRule = betoRules ? betoRules : betoCompiledRules;
     const matches: { [trigger: string]: string[][] } = {};
+    const matchesWithIndex: { [trigger: string]: { groups: string[], index: number }[] } = {};
     for (const trigger of Object.keys(rules)) {
         if (rules[trigger]) {
             for (const regex of rules[trigger]) {
-                const match = input.match(regex);
-                if (match) {
-                    if (!matches[trigger]) matches[trigger] = [];
-                    matches[trigger].push(
-                        match.slice(1).filter(m => m !== undefined)
-                    );
+                // Create a global regex copy to find multiple matches
+                const globalRegex = new RegExp(regex.source, regex.flags.includes('g') ? regex.flags : regex.flags + 'g');
+
+                let match;
+                while ((match = globalRegex.exec(input)) !== null) {
+                    if (!matchesWithIndex[trigger]) matchesWithIndex[trigger] = [];
+
+                    // Push captured groups, filtering out undefined
+                    matchesWithIndex[trigger].push({
+                        groups: match.slice(1).filter(m => m !== undefined),
+                        index: match.index
+                    });
                 }
             }
         }
     }
 
-    return matches;
+    const sortedMatches: { [trigger: string]: string[][] } = {};
+    for (const trigger in matchesWithIndex) {
+        const sorted = matchesWithIndex[trigger]?.sort((a, b) => a.index - b.index);
+        if (sorted) sortedMatches[trigger] = sorted.map(match => match.groups);
+    }
+
+
+    return sortedMatches;
 }
 
 export function betoQuickParse(input: string, config: BetoConfig) {
