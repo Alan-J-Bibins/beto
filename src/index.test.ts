@@ -1,23 +1,35 @@
-import { expect, describe, it, test } from 'vitest';
-import { betoQuickParse } from './index.js';
+import { expect, describe, test } from 'vitest';
+import { betoQuickParse } from './index.ts';
 
 describe('betoQuickParse', () => {
     test('parses "due on 10-09-2005" with due -> due on $date rule', () => {
         const result = betoQuickParse('due on 10-09-2005', {
             rules: ['due -> due on $date'],
         });
-        console.log("result = ", result)
 
         expect(result).toHaveProperty('due');
         expect(result.due).toHaveLength(1);
-        expect(result.due[0]).toContain('10-09-2005');
+        expect(result.due?.at(0)).toContain('10-09-2005');
     });
 
     test('parses multiple rules for same trigger', () => {
         const result = betoQuickParse('due on 10-09-2005 and due 11-10-2006', {
             rules: ['due -> due $date', 'due -> due on $date', 'remind -> remind me on $date'],
         });
-        console.log("result = ", result)
+        expect(result).toHaveProperty('due');
+        expect(result.due).toHaveLength(2);
+        expect(result.due?.at(0)).toContain('10-09-2005');
+        expect(result.due?.at(1)).toContain('11-10-2006');
+    });
+
+    test('parses multiple times for same trigger with same rule', () => {
+        const result = betoQuickParse('due on 10-09-2005 and due on 11-10-2006', {
+            rules: ['due -> due $date', 'due -> due on $date', 'remind -> remind me on $date'],
+        });
+        expect(result).toHaveProperty('due');
+        expect(result.due).toHaveLength(2);
+        expect(result.due?.at(0)).toContain('10-09-2005');
+        expect(result.due?.at(1)).toContain('11-10-2006');
     });
 
     test('parses time formats', () => {
@@ -26,17 +38,26 @@ describe('betoQuickParse', () => {
         });
 
         expect(result).toHaveProperty('meeting');
-        expect(result.meeting[0]).toContain('2pm');
+        expect(result.meeting?.at(0)).toContain('2pm');
+    });
+
+    test('parses time formats', () => {
+        const result = betoQuickParse('meeting at 2:00 PM and meeting at 00:12', {
+            rules: ['meeting -> meeting at $time'],
+        });
+        console.log("[src/index.test.ts:46] result = ", result)
+
+        expect(result).toHaveProperty('meeting');
+        expect(result.meeting?.at(0)).toContain('2:00 PM');
     });
 
     test('parses relative dates like "today"', () => {
         const result = betoQuickParse('due today', {
             rules: ['due -> due $date'],
         });
-        console.log("result = ", result)
 
         expect(result).toHaveProperty('due');
-        expect(result.due[0]).toContain('today');
+        expect(result.due?.at(0)).toContain('today');
     });
 
     test('handles invalid rules gracefully', () => {
@@ -60,6 +81,6 @@ describe('betoQuickParse', () => {
             rules: ['due -> due on $date'],
         });
 
-        expect(result.due[0]).not.toContain(undefined);
+        expect(result.due?.at(0)).not.toContain(undefined);
     });
 });

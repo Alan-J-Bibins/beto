@@ -29,11 +29,11 @@ const defaultTypes: { [key: string]: RegExp[] } = {
         /\b(0?[1-9]|[12]\d|3[01]) (January|February|March|April|May|June|July|August|September|October|November|December)\b/i,
     ],
     time: [
+        // 12-hour format with optional minutes and AM/PM (case insensitive)
+        /\b(0?[1-9]|1[0-2]):([0-5][0-9])?\s*(AM|PM|am|pm)\b/,
         // 24-hour format HH:MM:SS or HH:MM
         /\b([01]?[0-9]|2[0-3]):([0-5][0-9]):([0-5][0-9])\b/,
         /\b([01]?[0-9]|2[0-3]):([0-5][0-9])\b/,
-        // 12-hour format with optional minutes and AM/PM (case insensitive)
-        /\b(0?[1-9]|1[0-2])(:[0-5][0-9])?\s?(AM|PM|am|pm)\b/,
         // 12-hour format without colon and with AM/PM: e.g. 7am, 11pm
         /\b(0?[1-9]|1[0-2])\s?(AM|PM|am|pm)\b/,
         // Simple hours only 0-23
