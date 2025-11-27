@@ -1,12 +1,11 @@
-
 type BetoConfig = {
-    rules: string[],
-    types?: { [key: string]: RegExp[] },
-}
+    rules: string[];
+    types?: { [key: string]: RegExp[] };
+};
 
 type BetoRule = {
-    [trigger: string]: RegExp[],
-}
+    [trigger: string]: RegExp[];
+};
 
 const defaultTypes: { [key: string]: RegExp[] } = {
     date: [
@@ -25,8 +24,7 @@ const defaultTypes: { [key: string]: RegExp[] } = {
         /\btomorrow\b/i,
         /\byesterday\b/i,
         // Day and month name (without year)
-        /\b(0?[1-9]|[12]\d|3[01]) (January|February|March|April|May|June|July|August|September|October|November|December)\b/i
-
+        /\b(0?[1-9]|[12]\d|3[01]) (January|February|March|April|May|June|July|August|September|October|November|December)\b/i,
     ],
     time: [
         // 24-hour format HH:MM:SS or HH:MM
@@ -39,7 +37,7 @@ const defaultTypes: { [key: string]: RegExp[] } = {
         // Simple hours only 0-23
         /\b([01]?[0-9]|2[0-3])\b/,
     ],
-}
+};
 
 function initialize(config: BetoConfig) {
     const types = config.types ?? defaultTypes;
@@ -58,10 +56,16 @@ function initialize(config: BetoConfig) {
 
             Object.entries(types).forEach(([key, regex]) => {
                 const placeholder = `$${key}`;
-                const totalRegex = new RegExp(regex.map(r => r.source).join('|'), 'i')
-                pattern = pattern.replaceAll(placeholder, `(${totalRegex.source})`)
+                const totalRegex = new RegExp(
+                    regex.map(r => r.source).join('|'),
+                    'i'
+                );
+                pattern = pattern.replaceAll(
+                    placeholder,
+                    `(${totalRegex.source})`
+                );
                 pattern = pattern.replace(/\s+/g, '\\s+');
-            })
+            });
             const regex = new RegExp(`\\b${pattern}\\b`, 'i');
 
             if (!compiledRules[trigger]) {
@@ -70,7 +74,7 @@ function initialize(config: BetoConfig) {
             compiledRules[trigger].push(regex);
         }
     }
-    return { types, rules: compiledRules }
+    return { types, rules: compiledRules };
 }
 
 export function betoParse(input: string, config: BetoConfig) {
@@ -84,7 +88,9 @@ export function betoParse(input: string, config: BetoConfig) {
                 const match = input.match(regex);
                 if (match) {
                     if (!matches[trigger]) matches[trigger] = [];
-                    matches[trigger].push(match.slice(1).filter(m => m !== undefined));
+                    matches[trigger].push(
+                        match.slice(1).filter(m => m !== undefined)
+                    );
                 }
             }
         }
