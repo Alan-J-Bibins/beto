@@ -7,6 +7,8 @@ type BetoRule = {
     [trigger: string]: RegExp[];
 };
 
+let betoCompiledRules: BetoRule = {};
+
 const defaultTypes: { [key: string]: RegExp[] } = {
     date: [
         // Numeric: DD-MM-YYYY or D-M-YYYY with -, /, or .
@@ -74,10 +76,12 @@ function initialize(config: BetoConfig) {
             compiledRules[trigger].push(regex);
         }
     }
+    betoCompiledRules = compiledRules;
     return { types, rules: compiledRules };
 }
 
-export function betoParse(input: string, rules: BetoRule) {
+export function betoParse(input: string, betoRules?: BetoRule) {
+    const rules: BetoRule = betoRules ? betoRules : betoCompiledRules;
     const matches: { [trigger: string]: string[][] } = {};
     for (const trigger of Object.keys(rules)) {
         if (rules[trigger]) {
@@ -97,23 +101,7 @@ export function betoParse(input: string, rules: BetoRule) {
 }
 
 export function betoQuickParse(input: string, config: BetoConfig) {
-    // console.log("[src/index.ts:50] input = ", input)
     const { rules } = initialize(config);
 
-    const matches: { [trigger: string]: string[][] } = {};
-    for (const trigger of Object.keys(rules)) {
-        if (rules[trigger]) {
-            for (const regex of rules[trigger]) {
-                const match = input.match(regex);
-                if (match) {
-                    if (!matches[trigger]) matches[trigger] = [];
-                    matches[trigger].push(
-                        match.slice(1).filter(m => m !== undefined)
-                    );
-                }
-            }
-        }
-    }
-
-    return matches;
+    return betoParse(input, rules);
 }
