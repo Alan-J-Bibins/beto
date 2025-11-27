@@ -77,7 +77,26 @@ function initialize(config: BetoConfig) {
     return { types, rules: compiledRules };
 }
 
-export function betoParse(input: string, config: BetoConfig) {
+export function betoParse(input: string, rules: BetoRule) {
+    const matches: { [trigger: string]: string[][] } = {};
+    for (const trigger of Object.keys(rules)) {
+        if (rules[trigger]) {
+            for (const regex of rules[trigger]) {
+                const match = input.match(regex);
+                if (match) {
+                    if (!matches[trigger]) matches[trigger] = [];
+                    matches[trigger].push(
+                        match.slice(1).filter(m => m !== undefined)
+                    );
+                }
+            }
+        }
+    }
+
+    return matches;
+}
+
+export function betoQuickParse(input: string, config: BetoConfig) {
     // console.log("[src/index.ts:50] input = ", input)
     const { rules } = initialize(config);
 
